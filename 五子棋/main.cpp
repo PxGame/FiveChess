@@ -19,10 +19,10 @@ int m_Height = 500;
 
 int m_ChessPos[25][25] = { 0 };					//棋子坐标
 POINT m_pt;										//最新一步骑的数组下标
-//BOOL m_ChessIsYes = FALSE;						//棋子位置是否有效
 
 ////////////////////////////////////////////////////////////////////////////////////
 //函数声明
+void SetClientSize();															//纠正用户区大小为500*500
 LRESULT CALLBACK WinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);	//消息响应
 HWND InitApplication(HINSTANCE hInstance);										//初始化程序
 void DrawChessboard(void);														//绘制棋盘
@@ -79,6 +79,13 @@ LRESULT CALLBACK WinProc(
 {
 	switch (uMsg)
 	{
+	case WM_SHOWWINDOW:
+		if (wParam == TRUE)
+		{
+			SetClientSize();
+		}
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		break;
 	case WM_PAINT:
 		DrawChessboard();
 		DrawAllChess();
@@ -124,7 +131,7 @@ HWND InitApplication(HINSTANCE hInstance)
 	RegisterClass(&wnd);
 
 	m_hWnd = CreateWindow(m_lpWindowName, "五子棋", WS_CAPTION | WS_SYSMENU,
-		(m_sWidth - m_Width) / 2, (m_sHeight - m_Height) / 2, m_Width + 6, m_Height + 28,
+		(m_sWidth - m_Width) / 2, (m_sHeight - m_Height) / 2, m_Width + 16, m_Height + 38,
 		NULL, NULL, hInstance, NULL);
 
 	return m_hWnd;
@@ -233,7 +240,7 @@ void isWinner(void)
 	int RightDiagonal_sum = 0;		//右斜线上棋子个数
 	int HorizontalLine_sum = 0;		//横线上棋子个数
 	int VerticalLine_sum = 0;		//竖线上棋子个数
-	
+
 	//------------------------------------------左斜线
 	//左边
 	for (delta = 1; m_pt.x - delta >= 0; delta++)
@@ -373,4 +380,40 @@ void ChessRule(void)
 
 	//判断是否胜利
 	isWinner();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+void SetClientSize(void)
+{
+	RECT  rectProgram, rectClient;
+
+	GetClientRect(m_hWnd, &rectClient);      //获得客户区坐标
+	if ((rectClient.right - rectClient.left) == 500 && (rectClient.bottom - rectClient.top) == 500)
+	{
+	//	MessageBox(NULL, "大小一样", NULL, NULL);
+		return;
+	}
+	//else
+	//{
+	//	//测试数据获取情况
+	//	char str[100];
+	//	std::sprintf(str, "Client_x = %d, Client_y = %d", rectClient.right - rectClient.left,rectClient.bottom - rectClient.top);
+	//	MessageBox(m_hWnd, str, "TEXT", NULL);
+	//	MessageBox(NULL, "大小不一样", NULL, NULL);
+	//}
+
+	GetWindowRect(m_hWnd, &rectProgram);   //获得程序窗口位于屏幕坐标
+
+	//非客户区宽,高
+	int nWidth = rectProgram.right - rectProgram.left - (rectClient.right - rectClient.left);
+	int nHeiht = rectProgram.bottom - rectProgram.top - (rectClient.bottom - rectClient.top);
+	nWidth += 500;
+	nHeiht += 500;
+
+	rectProgram.right = nWidth;
+	rectProgram.bottom = nHeiht;
+	int showToScreenx = (m_sWidth - m_Width) / 2;    //居中处理
+	int showToScreeny = (m_sHeight - m_Height) / 2;
+
+	MoveWindow(m_hWnd, showToScreenx, showToScreeny, rectProgram.right, rectProgram.bottom, false);
 }
