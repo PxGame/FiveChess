@@ -29,7 +29,7 @@ void DrawChessboard(void);														//绘制棋盘
 void DrawChess(int player, int x, int y);										//绘制棋子
 void DrawAllChess(void);														//绘制所有棋子
 void PlayChess(int player = 2);													//下棋
-void isWinner(void);															//当前一步棋是否胜利
+void WhetherVictory(void);														//当前一步棋是否胜利
 void ChessRule(void);															//下棋规则
 
 
@@ -95,7 +95,7 @@ LRESULT CALLBACK WinProc(
 		ChessRule();
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		break;
-	case WM_CLOSE :
+	case WM_CLOSE:
 		if (IDYES == MessageBox(m_hWnd, "是否关闭游戏？", "提示", MB_YESNO))
 		{
 			//释放资源
@@ -105,10 +105,10 @@ LRESULT CALLBACK WinProc(
 			DestroyWindow(m_hWnd);
 		}
 		break;
-	case WM_DESTROY :
+	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-	default :
+	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	return 0;
@@ -141,7 +141,7 @@ HWND InitApplication(HINSTANCE hInstance)
 void DrawChessboard(void)
 {
 	int delta = 0;//增量
-	
+
 	//画线
 	for (delta = 0; delta <= 480; delta += 20)
 	{
@@ -153,7 +153,7 @@ void DrawChessboard(void)
 		MoveToEx(m_hDC, 10 + delta, 10, NULL);
 		LineTo(m_hDC, 10 + delta, 490);
 	}
-	
+
 	//画中心点
 	m_hBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	SelectObject(m_hDC, m_hBrush);
@@ -166,14 +166,14 @@ void DrawChess(int player, int x, int y)
 
 	switch (player)
 	{
-	case 1 :
+	case 1:
 		m_hBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);//实心黑圆
 		break;
-	case 2 :
+	case 2:
 		m_hBrush = (HBRUSH)GetStockObject(WHITE_BRUSH);//空心黑圈
 		break;
 	default:
-		return ;
+		return;
 	}
 
 	SelectObject(m_hDC, m_hBrush);//选择画刷
@@ -183,7 +183,7 @@ void DrawChess(int player, int x, int y)
 void DrawAllChess(void)
 {
 	int x = 0, y = 0;
-	for (x = 0; x <25; x++)
+	for (x = 0; x < 25; x++)
 	{
 		for (y = 0; y < 25; y++)
 		{
@@ -232,118 +232,87 @@ void PlayChess(int player)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void isWinner(void)
+void WhetherVictory(void)
 {
-	int delta = 0;		//左斜线
+	int delta = 1;		//左斜线
 
 	int LeftDiagonal_sum = 0;		//左斜线上棋子个数
 	int RightDiagonal_sum = 0;		//右斜线上棋子个数
 	int HorizontalLine_sum = 0;		//横线上棋子个数
 	int VerticalLine_sum = 0;		//竖线上棋子个数
 
-	//------------------------------------------左斜线
-	//左边
-	for (delta = 1; m_pt.x - delta >= 0; delta++)
+	while (delta < 5)
 	{
-		if (m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x - delta][m_pt.y + delta])
+		//------------------------------------------左斜线
+		//左边
+		if (m_pt.x - delta >= 0 && m_pt.y + delta <= 24 && 
+			m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x - delta][m_pt.y + delta])
 		{
 			LeftDiagonal_sum++;
 		}
-		else
-		{
-			break;
-		}
-	}
-	//右边
-	for (delta = 1; m_pt.y - delta >= 0; delta++)
-	{
-		if (m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x + delta][m_pt.y - delta])
+		//右边
+		if (m_pt.x + delta <= 24 && m_pt.y - delta >= 0 && 
+			m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x + delta][m_pt.y - delta])
 		{
 			LeftDiagonal_sum++;
 		}
-		else
+		if (LeftDiagonal_sum >= 4)
 		{
-			break;
+			MessageBox(NULL, "Winner !", "TEXT", NULL);
 		}
-	}
-
-	//------------------------------------------右斜线
-	//左边
-	for (delta = 1; m_pt.y - delta >= 0; delta++)
-	{
-		if (m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x - delta][m_pt.y - delta])
+		//------------------------------------------右斜线
+		//左边
+		if (m_pt.x - delta >= 0 && m_pt.y - delta >= 0 && 
+			m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x - delta][m_pt.y - delta])
 		{
 			RightDiagonal_sum++;
 		}
-		else
-		{
-			break;
-		}
-	}
-	//右边
-	for (delta = 1; m_pt.y - delta <= 24; delta++)
-	{
-		if (m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x + delta][m_pt.y + delta])
+		//右边
+		if (m_pt.x + delta <= 24 && m_pt.y + delta <= 24 && 
+			m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x + delta][m_pt.y + delta])
 		{
 			RightDiagonal_sum++;
 		}
-		else
+		if (RightDiagonal_sum >= 4)
 		{
-			break;
+			MessageBox(NULL, "Winner !", "TEXT", NULL);
 		}
-	}
-
-	//------------------------------------------横线
-	//左边
-	for (delta = 1; m_pt.x - delta >= 0; delta++)
-	{
-		if (m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x - delta][m_pt.y])
+		//------------------------------------------横线
+		//左边
+		if (m_pt.x - delta >= 0 && 
+			m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x - delta][m_pt.y])
 		{
 			HorizontalLine_sum++;
 		}
-		else
-		{
-			break;
-		}
-	}
-	//右边
-	for (delta = 1; m_pt.y - delta <= 24; delta++)
-	{
-		if (m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x + delta][m_pt.y])
+		//右边
+		if (m_pt.x + delta <= 24 && 
+			m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x + delta][m_pt.y])
 		{
 			HorizontalLine_sum++;
 		}
-		else
+		if (HorizontalLine_sum >= 4)
 		{
-			break;
+			MessageBox(NULL, "Winner !", "TEXT", NULL);
 		}
-	}
-
-	//------------------------------------------竖线
-	//上边
-	for (delta = 1; m_pt.y - delta <= 24; delta++)
-	{
-		if (m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x][m_pt.y - delta])
+		//------------------------------------------竖线
+		//上边
+		if (m_pt.y - delta >= 0 && 
+			m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x][m_pt.y - delta])
 		{
 			VerticalLine_sum++;
 		}
-		else
-		{
-			break;
-		}
-	}
-	//下边
-
-	for (delta = 1; m_pt.y - delta <= 24; delta++)
-	{
-		if (m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x][m_pt.y + delta])
+		//下边
+		if (m_pt.y + delta <=24 && 
+			m_ChessPos[m_pt.x][m_pt.y] == m_ChessPos[m_pt.x][m_pt.y + delta])
 		{
 			VerticalLine_sum++;
 		}
-		else
+		if (VerticalLine_sum >= 4)
 		{
-			break;
+			MessageBox(NULL, "Winner !", "TEXT", NULL);
 		}
+
+		delta++;
 	}
 
 	////测试数据获取情况
@@ -351,12 +320,6 @@ void isWinner(void)
 	//std::sprintf(str, "x = %d, y = %d\nLeftDiagonal_sum = %d, RightDiagonal_sum = %d\nHorizontalLine_sum = %d, VerticalLine_sum = %d", 
 	//	m_pt.x,m_pt.y, LeftDiagonal_sum, RightDiagonal_sum, HorizontalLine_sum, VerticalLine_sum);
 	//MessageBox(NULL, str, "TEXT", NULL);
-
-	if (LeftDiagonal_sum >= 4 || RightDiagonal_sum >= 4 || HorizontalLine_sum >= 4 || VerticalLine_sum >= 4)
-	{
-		MessageBox(NULL, "Winner !", "TEXT", NULL);
-	}
-
 }
 
 void ChessRule(void)
@@ -374,12 +337,12 @@ void ChessRule(void)
 		PlayChess(2);
 		player--;
 		break;
-	default :
+	default:
 		MessageBox(NULL, "ChessRule() is error.\nNot the player !", "ERROR", NULL);
 	}
 
 	//判断是否胜利
-	isWinner();
+	WhetherVictory();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +353,7 @@ void SetClientSize(void)
 	GetClientRect(m_hWnd, &rectClient);      //获得客户区坐标
 	if ((rectClient.right - rectClient.left) == 500 && (rectClient.bottom - rectClient.top) == 500)
 	{
-	//	MessageBox(NULL, "大小一样", NULL, NULL);
+		//	MessageBox(NULL, "大小一样", NULL, NULL);
 		return;
 	}
 	//else
