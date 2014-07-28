@@ -34,10 +34,10 @@ HWND InitApplication(HINSTANCE hInstance);										//初始化程序
 void DrawChessboard(void);														//绘制棋盘
 void DrawChess(int player, int x, int y);										//绘制棋子
 void DrawAllChess(void);														//绘制所有棋子
-void PlayChess(int player = 2);													//下棋
-void WhetherVictory(void);														//当前一步棋是否胜利
+BOOL PlayChess(int player = 1);													//下棋
+BOOL WhetherVictory(void);														//当前一步棋是否胜利
 void ChessRule(void);															//下棋规则
-
+void InitGame(void);															//初始化游戏数据
 ///////////////////////////////////////////////////////////////////////////////////
 int WINAPI WinMain(
 	HINSTANCE hInstance,
@@ -90,16 +90,13 @@ LRESULT CALLBACK WinProc(
 			SetClientSize();
 		}
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
-		break;
 	case WM_PAINT:
 		DrawChessboard();
 		DrawAllChess();
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
-		break;
 	case WM_LBUTTONDOWN:
 		ChessRule();
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
-		break;
 	case WM_CLOSE:
 		if (IDYES == MessageBox(m_hWnd, "是否关闭游戏？", "提示", MB_YESNO))
 		{
@@ -147,7 +144,6 @@ HWND InitApplication(HINSTANCE hInstance)
 		MessageBox(NULL, "void ConsoleInfo(void) is error !", "ERROR", NULL);
 		return NULL;
 	}
-
 	return m_hWnd;
 }
 
@@ -172,6 +168,11 @@ void DrawChessboard(void)
 	m_hBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	SelectObject(m_hDC, m_hBrush);
 	Ellipse(m_hDC, 247, 247, 253, 253);
+
+	RECT rt;
+	GetClientRect(m_hWnd, &rt);
+	rt.bottom -= 50;
+	FrameRect(m_hDC, &rt, m_hBrush);
 }
 
 void DrawChess(int player, int x, int y)
@@ -207,53 +208,75 @@ void DrawAllChess(void)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void PlayChess(int player)
+void InitGame(void)
+{
+
+	//初始化数组为 0 ;
+	for (int i = 0; i < 25; i++)
+	{
+		for (int j = 0; j < 25; j++)
+		{
+			m_ChessPos[i][j] = 0;
+		}
+	}
+
+	//初始化信息栏
+	SetWindowText(m_hInfo, "\n游戏提示信息...");
+
+	//初始化玩家
+	m_player = 1;
+
+	////初始化背景
+	//RECT rt;
+	//GetClientRect(m_hWnd, &rt);
+	//m_hBrush = CreateSolidBrush(GetBkColor(m_hDC));
+	//FillRect(m_hDC, &rt, m_hBrush);
+	InvalidateRect(NULL, NULL, TRUE);
+	UpdateWindow(m_hWnd);
+}
+
+BOOL PlayChess(int player)
 {
 	//取坐标
 	POINT pt;
-	while (1)
+	//获取鼠标在用户区的坐标
+	if (!GetCursorPos(&pt))
 	{
-		//获取鼠标在用户区的坐标
-		if (!GetCursorPos(&pt))
+		MessageBox(m_hWnd, "void PlayChess(void) is error !", "ERROR", NULL);
+	}
+	ScreenToClient(m_hWnd, &pt);//转换为客户区坐标
+
+	if (pt.x <= 500 && pt.y <= 500)//单击在有效棋盘内
+	{
+		//获取坐标对应的数组下标
+		m_pt.x = pt.x / 20;
+		m_pt.y = pt.y / 20;
+
+		if (m_ChessPos[m_pt.x][m_pt.y] == 0)//如果该位置未被下，则写入棋子，退出循环，否者重行下棋
 		{
-			MessageBox(m_hWnd, "void PlayChess(void) is error !", "ERROR", NULL);
+
+			//写入数组，并重新绘制棋盘
+			m_ChessPos[m_pt.x][m_pt.y] = player;
+			SendMessage(m_hWnd, WM_PAINT, 0, 0);
+			return TRUE;
 		}
-		ScreenToClient(m_hWnd, &pt);//转换为客户区坐标
 
-		if (pt.x <= 500 && pt.y <= 500)
-		{
-			//获取坐标对应的数组下标
-			m_pt.x = pt.x / 20;
-			m_pt.y = pt.y / 20;
-
-			if (m_ChessPos[m_pt.x][m_pt.y] == 0)//如果该位置未被下，则写入棋子，退出循环，否者重行下棋
-			{
-
-				//写入数组，并重新绘制棋盘
-				m_ChessPos[m_pt.x][m_pt.y] = player;
-				SendMessage(m_hWnd, WM_PAINT, 0, 0);
-				break;
-			}
-
-			//EnableWindow(m_hWnd, FALSE);
-			//ShowWindow(m_hWnd, SW_HIDE);//隐藏窗口
-
-			MessageBox(NULL, "该位置已有棋子，请重新换一位置！", "ERROR", NULL);
-
-			//EnableWindow(m_hWnd, TRUE);
-			//ShowWindow(m_hWnd, SW_SHOW);
-		}
+		MessageBox(m_hWnd, "该位置已有棋子，请重新换一位置！", "ERROR", NULL);
 	}
 
 	////测试数据获取情况
 	//char str[100];
 	//std::sprintf(str, "pt.x = %d, pt.y = %d\nx = %d, y = %d", pt.x, pt.y, x, y);
 	//MessageBox(m_hWnd, str, "TEXT", NULL);
+	
+	return FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 void ChessRule(void)
 {
+	//字符串格式化用数组
+	char info[100] = { 0 };
 	//取坐标
 	POINT pt;
 	//获取鼠标在用户区的坐标
@@ -269,27 +292,42 @@ void ChessRule(void)
 		switch (m_player)
 		{
 		case 1:
-			PlayChess(1);
-			m_player++;
+			sprintf(info, "\n当前玩家 ：player %d", m_player);
+			if(PlayChess(1))
+				m_player++;
 			break;
 		case 2:
-			PlayChess(2);
-			m_player--;
+			sprintf(info, "\nplayer %d is Winner !", m_player);
+			if(PlayChess(2))
+				m_player--;
 			break;
 		default:
 			MessageBox(NULL, "ChessRule() is error.\nNot the player !", "ERROR", NULL);
 		}
-		//判断是否胜利
-		WhetherVictory();
 
+		//判断是否胜利
 		//设置状态栏信息显示
-		char info[100] = { 0 };
-		sprintf(info, "\n当前玩家 ：player %d", m_player);
-		SetWindowText(m_hInfo, info);
+		if (!WhetherVictory())
+		{
+			sprintf(info, "\n当前玩家 ：player %d", m_player);
+			SetWindowText(m_hInfo, info);
+		}
+		else
+		{
+			SetWindowText(m_hInfo, info);
+			if (IDYES == MessageBox(m_hWnd, "按\"是\"重新开始，按\"否\"退出游戏。", "游戏结束", MB_YESNO))
+			{
+				InitGame();
+			}
+			else
+			{
+				SendMessage(m_hWnd, WM_DESTROY, 0, 0);
+			}
+		}
 	}
 }
 
-void WhetherVictory(void)
+BOOL WhetherVictory(void)
 {
 	int delta = 1;					//从除这一步棋以外的棋开始计算连棋个数
 
@@ -316,8 +354,7 @@ void WhetherVictory(void)
 		//判断是否胜利
 		if (LeftDiagonal_sum >= 4)
 		{
-			MessageBox(NULL, "Winner !", "TEXT", NULL);
-			return;
+			return TRUE;
 		}
 		//------------------------------------------右斜线
 		//左边
@@ -335,8 +372,7 @@ void WhetherVictory(void)
 		//判断是否胜利
 		if (RightDiagonal_sum >= 4)
 		{
-			MessageBox(NULL, "Winner !", "TEXT", NULL);
-			return;
+			return TRUE;
 		}
 		//------------------------------------------横线
 		//左边
@@ -354,8 +390,7 @@ void WhetherVictory(void)
 		//判断是否胜利
 		if (HorizontalLine_sum >= 4)
 		{
-			MessageBox(NULL, "Winner !", "TEXT", NULL);
-			return;
+			return TRUE;
 		}
 		//------------------------------------------竖线
 		//上边
@@ -373,8 +408,7 @@ void WhetherVictory(void)
 		//判断是否胜利
 		if (VerticalLine_sum >= 4)
 		{
-			MessageBox(NULL, "Winner !", "TEXT", NULL);
-			return;
+			return TRUE;
 		}
 
 		delta++;
@@ -385,6 +419,8 @@ void WhetherVictory(void)
 	//std::sprintf(str, "x = %d, y = %d\nLeftDiagonal_sum = %d, RightDiagonal_sum = %d\nHorizontalLine_sum = %d, VerticalLine_sum = %d", 
 	//	m_pt.x,m_pt.y, LeftDiagonal_sum, RightDiagonal_sum, HorizontalLine_sum, VerticalLine_sum);
 	//MessageBox(NULL, str, "TEXT", NULL);
+
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
