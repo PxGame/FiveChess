@@ -1,10 +1,15 @@
-﻿生成启动时间为 7/28/2014 10:00:18 PM。
-     1>项目“G:\学习\C++学习\五子棋\五子棋\五子棋.vcxproj”在节点 2 上(ClCompile 个目标)。
+﻿生成启动时间为 8/1/2014 1:06:38 PM。
+     1>项目“G:\学习\C++学习\五子棋\五子棋\五子棋.vcxproj”在节点 2 上(Rebuild 个目标)。
      1>ClCompile:
-         G:\programmingSoftware\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         G:\programmingSoftware\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USING_V110_SDK71_ /Gm- /EHsc /MTd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
          main.cpp
-     1>已完成生成项目“G:\学习\C++学习\五子棋\五子棋\五子棋.vcxproj”(ClCompile 个目标)的操作。
+       Link:
+         G:\programmingSoftware\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"G:\学习\C++学习\五子棋\Release\五子棋.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"G:\学习\C++学习\五子棋\Release\五子棋.pdb" /SUBSYSTEM:WINDOWS,"5.01" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"G:\学习\C++学习\五子棋\Release\五子棋.lib" /MACHINE:X86 /SAFESEH Release\main.obj
+         正在生成代码
+         已完成代码的生成
+         五子棋.vcxproj -> G:\学习\C++学习\五子棋\Release\五子棋.exe
+     1>已完成生成项目“G:\学习\C++学习\五子棋\五子棋\五子棋.vcxproj”(Rebuild 个目标)的操作。
 
 生成成功。
 
-已用时间 00:00:00.84
+已用时间 00:00:01.42
